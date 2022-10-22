@@ -51,7 +51,7 @@ class STLFile:
 
         px = bmax.x - bmin.x + 1
         py = bmax.y - bmin.y + 1
-        pz = bmax.z - bmax.z + 1
+        pz = bmax.z - bmin.z + 1
 
         # check if part fits without rotation
         if px <= szx and py <= szy and pz <= szz:
