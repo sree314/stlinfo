@@ -15,29 +15,10 @@ class STLFile:
         self.mesh = mesh.Mesh.from_file(self.filename)
 
     def bounds(self):
-        # adapted from the example
         # find the max dimensions, so we can know the bounding box, getting the height,
         # width, length (because these are the step size)...
-
-        minx = maxx = miny = maxy = minz = maxz = None
-        for p in self.mesh.points:
-            # p contains (x, y, z)
-            if minx is None:
-                minx = p[stl.Dimension.X]
-                maxx = p[stl.Dimension.X]
-                miny = p[stl.Dimension.Y]
-                maxy = p[stl.Dimension.Y]
-                minz = p[stl.Dimension.Z]
-                maxz = p[stl.Dimension.Z]
-            else:
-                maxx = max(p[stl.Dimension.X], maxx)
-                minx = min(p[stl.Dimension.X], minx)
-                maxy = max(p[stl.Dimension.Y], maxy)
-                miny = min(p[stl.Dimension.Y], miny)
-                maxz = max(p[stl.Dimension.Z], maxz)
-                minz = min(p[stl.Dimension.Z], minz)
-
-        return Point(minx, miny, minz), Point(maxx, maxy, maxz)
+        return Point(self.mesh.min_[0], self.mesh.min_[1], self.mesh.min_[2]), \
+            Point(self.mesh.max_[0], self.mesh.max_[1], self.mesh.max_[2])
 
     def fits(self, bounds, szx, szy, szz):
         def rotate(pt, angle_rad):

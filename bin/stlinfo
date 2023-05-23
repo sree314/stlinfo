@@ -3,21 +3,29 @@
 
 import stlinfo
 import argparse
-
+import json
 
 if __name__ == "__main__":
    p = argparse.ArgumentParser(description="Describe STL file")
    p.add_argument("stlfiles", nargs="+")
    p.add_argument("--fit", help="Check fit against bounds of x,y,z")
+   p.add_argument("--poly2d", help="Output 2D bounds polygon", action="store_true")
+   p.add_argument("-o", dest="output", metavar="FILE", help="Output JSON file")
 
    args = p.parse_args()
 
    multifile = len(args.stlfiles) > 1
+   out = {"files": []}
+
    if args.fit:
-      x, y, z = tuple([int(b) for b in args.fit.split(",")])
+      x, y, z = tuple([float(b) for b in args.fit.split(",")])
+      out["fit_bounds"] = [x, y, z]
 
    for fn in args.stlfiles:
       if multifile: print(f"====> {fn} <====")
+
+      fileinfo = {"name": fn}
+
       f = stlinfo.STLFile()
       f.load_file(fn)
       minp, maxp = f.bounds()
@@ -25,5 +33,25 @@ if __name__ == "__main__":
       print("Y: ", maxp.y - minp.y, "min y:", minp.y)
       print("Z: ", maxp.z - minp.z, "min z:", minp.z)
 
+      fileinfo["min_point"] = [float(x) for x in [minp.x, minp.y, minp.z]]
+      fileinfo["max_point"] = [float(x) for x in [maxp.x, maxp.y, maxp.z]]
+
+      fileinfo["dimensions"] = [float(x) for x in [maxp.x - minp.x, maxp.y - minp.y, maxp.z - minp.z]]
+
       if args.fit:
-         print(f"Fits in {x}x{y}x{z}: ", "Yes" if f.fits((minp, maxp), x, y, z) else "No")
+         fits = f.fits((minp, maxp), x, y, z)
+         print(f"Fits in {x}x{y}x{z}: ", "Yes" if fits  else "No")
+         fileinfo["fits"] = fits
+
+      if args.poly2d:
+         poly2d = [[(float(x), float(y)) for x, y in [(minp.x, minp.y), (minp.x, maxp.y), (maxp.x, maxp.y), (maxp.x, minp.y)]]]
+         fileinfo["poly2d"] = poly2d
+
+      out["files"].append(fileinfo)
+
+   if args.output:
+      with open(args.output, "w") as f:
+         json.dump(out, fp=f, indent='  ')
+   else:
+      #print(out)
+      pass
