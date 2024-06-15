@@ -20,7 +20,9 @@ class STLFile:
         return Point(self.mesh.min_[0], self.mesh.min_[1], self.mesh.min_[2]), \
             Point(self.mesh.max_[0], self.mesh.max_[1], self.mesh.max_[2])
 
-    def fits(self, bounds, szx, szy, szz):
+    def fits(self, bounds, szx, szy, szz, rot=True):
+        # rot is a boolean indicating whether the fits check is 
+        # for the original model (False) or its rotated version (True).
         def rotate(pt, angle_rad):
             return Point(pt.x*math.cos(angle_rad) - pt.y*math.sin(angle_rad),
                          pt.y*math.cos(angle_rad) + pt.x*math.sin(angle_rad),
@@ -37,6 +39,10 @@ class STLFile:
         # check if part fits without rotation
         if px <= szx and py <= szy and pz <= szz:
             return True
+        
+        # stop here if it doesn't allow rotation
+        if not rot:
+            return False
 
         # don't explore rotations in Z
         if pz > szz:
