@@ -20,7 +20,7 @@ class STLFile:
         return Point(self.mesh.min_[0], self.mesh.min_[1], self.mesh.min_[2]), \
             Point(self.mesh.max_[0], self.mesh.max_[1], self.mesh.max_[2])
 
-    def fits(self, bounds, szx, szy, szz, rot):
+    def fits(self, bounds, szx, szy, szz, rot=True):
         # rot is a boolean indicating whether the fits check is 
         # for the original model (False) or its rotated version (True).
         def rotate(pt, angle_rad):
